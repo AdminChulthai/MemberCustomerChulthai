@@ -107,8 +107,8 @@
             </button>
         </div>
         
-        <div class="mt-6 text-center text-xs text-gray-400">
-            อัพเดทล่าสุด 08/03/2569
+        <div id="app-version-display" class="mt-6 text-center text-xs text-gray-400">
+            กำลังตรวจสอบเวอร์ชัน...
         </div>
     </div>
 
@@ -1011,6 +1011,24 @@
                 showMsg('เกิดข้อผิดพลาด', error.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
             });
         }
+
+        // ดึงข้อมูลเวอร์ชันเมื่อโหลดหน้าเว็บเสร็จ
+        document.addEventListener('DOMContentLoaded', () => {
+            if (GAS_WEBAPP_URL !== "YOUR_GAS_WEB_APP_URL_HERE" && GAS_WEBAPP_URL.trim() !== "") {
+                callGasApi('getAppVersion')
+                    .then(res => {
+                        if (res.success) {
+                            document.getElementById('app-version-display').innerText = res.version;
+                        } else {
+                            document.getElementById('app-version-display').innerText = "ไม่สามารถระบุเวอร์ชันได้";
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('app-version-display').innerText = "เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว";
+                        console.error("Fetch version error:", err);
+                    });
+            }
+        });
     </script>
 </body>
 </html>
