@@ -41,10 +41,10 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start pt-8 px-4 pb-24">
+<body class="min-h-screen flex flex-col items-center justify-start pt-8 px-4 pb-24 w-full">
 
     <!-- Modal แจ้งเตือน -->
-    <div id="msg-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black bg-opacity-50 transition-opacity">
+    <div id="msg-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black bg-opacity-50 transition-opacity w-full">
         <div class="bg-white rounded-2xl p-6 w-80 text-center shadow-xl transform scale-100">
             <h3 id="msg-title" class="text-lg font-bold mb-2">แจ้งเตือน</h3>
             <p id="msg-text" class="text-gray-600 mb-6 whitespace-pre-wrap"></p>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- 1. หน้าเข้าสู่ระบบ -->
-    <div id="login-section" class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 transition-all duration-500">
+    <div id="login-section" class="w-full max-w-md transition-all duration-500 mt-4">
         <div class="text-center mb-8">
             <img src="https://drive.google.com/thumbnail?id=1mqBzzmA7Ov-OFfvk2lwaFtSzWmKtqc61&sz=w500" 
                  alt="จุลไหมไทย โลโก้" 
@@ -67,7 +67,7 @@
             <div>
                 <label for="inputPhone" class="block text-sm font-semibold text-gray-700 mb-2">เบอร์โทรศัพท์</label>
                 <input type="tel" id="inputPhone" maxlength="10" 
-                       class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-left text-xl tracking-widest font-bold"
+                       class="w-full bg-white px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-left text-xl tracking-widest font-bold"
                        placeholder="08XXXXXXXX"
                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             </div>
@@ -76,7 +76,7 @@
                 <label for="inputPassword" class="block text-sm font-semibold text-gray-700 mb-2">รหัสผ่าน</label>
                 <div class="relative">
                     <input type="password" id="inputPassword" 
-                           class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-left text-xl tracking-widest font-bold pr-12"
+                           class="w-full bg-white px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-left text-xl tracking-widest font-bold pr-12"
                            placeholder="••••••••">
                     <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
                         <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@
             </button>
         </div>
         
-        <div id="app-version-display" class="mt-6 text-center text-xs text-gray-400">
+        <div id="app-version-display" class="mt-8 text-center text-xs text-gray-400">
             กำลังตรวจสอบเวอร์ชัน...
         </div>
     </div>
@@ -210,7 +210,7 @@
     </div>
 
     <!-- 3. Modal QR Code หลัก (ใช้รับแต้ม) -->
-    <div id="qr-modal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-black bg-opacity-70 transition-opacity">
+    <div id="qr-modal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-black bg-opacity-70 transition-opacity w-full">
         <div class="bg-white rounded-3xl p-8 w-11/12 max-w-sm text-center shadow-2xl relative">
             <button onclick="closeQRModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,7 +228,7 @@
     </div>
 
     <!-- 3.1 หน้าต่างรายละเอียดของรางวัล (แลกแต้ม) -->
-    <div id="reward-detail-modal" class="fixed inset-0 z-50 hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 max-w-md mx-auto shadow-2xl">
+    <div id="reward-detail-modal" class="fixed inset-0 z-50 hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 w-full shadow-2xl">
         <div class="px-4 py-3 flex items-center border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
             <button onclick="closeRewardDetail()" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -255,7 +255,7 @@
             </div>
         </div>
 
-        <div class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-100 z-10 max-w-md mx-auto left-1/2 transform -translate-x-1/2">
+        <div class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-gray-100 z-10">
              <button onclick="openConfirmModal()" class="w-full bg-blue-800 text-white font-bold py-3.5 rounded-xl shadow-lg hover:bg-blue-900 transition-colors">
                 แลกของรางวัล
              </button>
@@ -263,7 +263,7 @@
     </div>
 
     <!-- 3.2 ป๊อปอัพยืนยันการแลก -->
-    <div id="confirm-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity">
+    <div id="confirm-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity w-full">
         <div class="bg-white rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl relative transform scale-100">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -283,7 +283,7 @@
     </div>
 
     <!-- 3.3 หน้าต่างรายละเอียด "รางวัลของฉัน" (My Reward Detail Modal) -->
-    <div id="my-reward-detail-modal" class="fixed inset-0 z-[60] hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 max-w-md mx-auto shadow-2xl">
+    <div id="my-reward-detail-modal" class="fixed inset-0 z-[60] hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 w-full shadow-2xl">
         <div class="px-4 py-3 flex items-center border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
             <button onclick="closeMyRewardDetail()" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -335,7 +335,7 @@
     </div>
 
     <!-- 3.4 หน้าต่าง "เปลี่ยนรหัสผ่าน" -->
-    <div id="change-pwd-modal" class="fixed inset-0 z-[60] hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 max-w-md mx-auto shadow-2xl">
+    <div id="change-pwd-modal" class="fixed inset-0 z-[60] hidden bg-white flex flex-col transition-transform transform translate-x-full duration-300 w-full shadow-2xl">
         <div class="px-4 py-3 flex items-center border-b border-gray-100 bg-white sticky top-0 z-10 shadow-sm">
             <button onclick="closeChangePwdModal()" class="text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -371,7 +371,7 @@
     </div>
 
     <!-- 3.5 ป๊อปอัพยืนยันเปลี่ยนรหัสผ่าน -->
-    <div id="confirm-pwd-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity">
+    <div id="confirm-pwd-modal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity w-full">
         <div class="bg-white rounded-3xl p-6 w-11/12 max-w-sm text-center shadow-2xl relative transform scale-100">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -392,7 +392,7 @@
 
     <!-- 4. แถบเมนูด้านล่าง -->
     <div id="bottom-nav" class="fixed bottom-0 left-0 w-full bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] z-40 hidden">
-        <div class="flex justify-around items-center h-16 max-w-md mx-auto px-2">
+        <div class="flex justify-around items-center h-16 w-full max-w-md mx-auto px-2">
             <button id="nav-home" onclick="switchTab('home')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-blue-800 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
                 <span class="text-[10px] mt-1 font-bold">หน้าหลัก</span>
