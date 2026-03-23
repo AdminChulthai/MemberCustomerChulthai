@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- ======================================================== -->
-    <!-- ⚙️ ตั้งค่าส่วนที่ 1: ชื่อหน้าเว็บและไอคอน (Favicon)            -->
-    <!-- ======================================================== -->
     <title>ระบบสมาชิก จุลไหมไทย</title>
     <link rel="icon" type="image/png" href="https://i.postimg.cc/0NP9YsLz/Logo-CTS.png">
-    <!-- ======================================================== -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,11 +30,7 @@
         }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* ปรับ Transition ให้เนียนขึ้นสำหรับหลอดโหลด */
-        .progress-smooth {
-            transition: width 50ms linear;
-        }
+        .progress-smooth { transition: width 50ms linear; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start pt-8 px-4 pb-24">
@@ -156,7 +148,7 @@
         <div class="w-full mt-2 mb-6">
             <h3 class="font-bold text-gray-800 mb-4 px-2 text-lg">ของรางวัลที่แลกได้</h3>
             <div id="rewards-container" class="grid grid-cols-2 gap-4">
-                <!-- ข้อมูลการ์ดของรางวัล -->
+                <!-- ข้อมูลการ์ดของรางวัลจะแสดงที่นี่ -->
             </div>
         </div>
     </div>
@@ -180,7 +172,15 @@
 
         <!-- พื้นที่แสดงการ์ด (สามารถ Scroll ได้เมื่อล้นจอ) -->
         <div class="flex-1 overflow-y-auto hide-scroll px-1 pb-6">
-            <div id="my-rewards-available-container" class="flex flex-col gap-3"></div>
+            <div id="my-rewards-available-container" class="flex flex-col gap-3">
+                <div class="text-center text-sm text-gray-400 py-8 flex flex-col items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    กำลังโหลดข้อมูลคูปอง...
+                </div>
+            </div>
             <div id="my-rewards-used-container" class="flex flex-col gap-3 hidden"></div>
             <div id="my-rewards-expired-container" class="flex flex-col gap-3 hidden"></div>
         </div>
@@ -439,7 +439,7 @@
                 const response = await fetch(GAS_WEBAPP_URL, {
                     method: 'POST',
                     body: JSON.stringify({ action: action, data: data }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } // ป้องกันปัญหา CORS
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
                 });
                 return await response.json();
             } catch (error) {
@@ -499,28 +499,27 @@
                 const progText = document.getElementById('progress-text');
                 const progLabel = document.getElementById('progress-label');
                 
-                progLabel.innerText = 'กำลังเชื่อมต่อข้อมูล...';
+                progLabel.innerText = 'กำลังตรวจสอบสิทธิ์...';
                 progBar.style.transitionDuration = '100ms'; 
                 
                 let currentProgress = 0;
                 
                 if (loginProgressInterval) clearInterval(loginProgressInterval);
                 loginProgressInterval = setInterval(() => {
-                    if (currentProgress < 85) {
+                    if (currentProgress < 90) {
                         currentProgress += 1;
                         progBar.style.width = currentProgress + '%';
                         progText.innerText = currentProgress + '%';
                         
-                        if(currentProgress === 30) progLabel.innerText = 'กำลังตรวจสอบสิทธิ์...';
-                        if(currentProgress === 60) progLabel.innerText = 'กำลังเตรียมข้อมูลลูกค้า...';
+                        if(currentProgress === 40) progLabel.innerText = 'โหลดข้อมูลผู้ใช้และโปรโมชัน...';
                     }
-                }, 35); 
+                }, 15);
 
             } else {
                 phone = savedPhone; password = savedPassword;
             }
 
-            // เรียกใช้ API ใหม่ที่เซิร์ฟเวอร์
+            // เรียกใช้ API โหลดเฉพาะข้อมูลที่จำเป็นก่อน (Home Data)
             callGasApi('loginUser', { phone: phone, password: password })
                 .then(response => {
                     if (!isSilent) clearInterval(loginProgressInterval);
@@ -550,7 +549,7 @@
                 
                 if (response.success) {
                     progLabel.innerText = 'เสร็จสมบูรณ์!';
-                    progBar.style.transitionDuration = '300ms'; 
+                    progBar.style.transitionDuration = '100ms'; 
                     progBar.style.width = '100%'; 
                     progText.innerText = '100%';
                 } else {
@@ -564,6 +563,7 @@
 
             currentUser = response;
             
+            // 1. อัปเดตข้อมูลหน้าหลัก
             let cleanPoints = String(response.points || '0').replace(/,/g, '');
             let parsedPoints = parseFloat(cleanPoints);
             document.getElementById('disp-points').innerText = isNaN(parsedPoints) ? '0' : parsedPoints.toLocaleString('en-US');
@@ -579,34 +579,24 @@
             if (response.accumulatedVolume !== undefined && response.accumulatedVolume !== null && String(response.accumulatedVolume).trim() !== '') {
                 let cleanVolume = String(response.accumulatedVolume).replace(/,/g, '');
                 let parsedVol = parseFloat(cleanVolume);
-                
-                if (!isNaN(parsedVol)) {
-                    volumeDisplay = parsedVol.toLocaleString('en-US');
-                } else {
-                    volumeDisplay = response.accumulatedVolume; 
-                }
+                volumeDisplay = !isNaN(parsedVol) ? parsedVol.toLocaleString('en-US') : response.accumulatedVolume; 
             }
             document.getElementById('disp-volume').innerText = volumeDisplay;
 
+            // อัปเดตสีเลเวล
             const lvlBadge = document.getElementById('disp-level');
             const levelColors = [
-                'linear-gradient(to right, #9ca3af, #6b7280)', 'linear-gradient(to right, #cbd5e1, #94a3b8)', 
-                'linear-gradient(to right, #fbbf24, #f59e0b)', 'linear-gradient(to right, #a855f7, #7e22ce)', 
-                'linear-gradient(to right, #1f2937, #000000)', 'linear-gradient(to right, #ef4444, #b91c1c)', 
-                'linear-gradient(to right, #10b981, #047857)', 'linear-gradient(to right, #3b82f6, #1d4ed8)'  
+                'linear-gradient(to right, #6b7280, #374151)', // เริ่มต้น
+                'linear-gradient(to right, #9ca3af, #d1d5db)', // เงิน
+                'linear-gradient(to right, #fbbf24, #d97706)', // ทอง
+                'linear-gradient(to right, #ef4444, #991b1b)', // ทับทิม
+                'linear-gradient(to right, #06b6d4, #0369a1)', // เพชร
             ];
-            const knownLevels = { 'เริ่มต้น': 0, 'เงิน': 1, 'ทอง': 2, 'อัญมณี': 3, 'สูงสุด': 4 };
-            let colorIndex = 0;
-            
-            if (response.level && knownLevels[response.level] !== undefined) {
-                colorIndex = knownLevels[response.level];
-            } else if (response.level) {
-                let hash = 0;
-                for (let i = 0; i < response.level.length; i++) hash = response.level.charCodeAt(i) + ((hash << 5) - hash);
-                colorIndex = Math.abs(hash) % levelColors.length;
-            }
+            const knownLevels = { 'เริ่มต้น': 0, 'เงิน': 1, 'ทอง': 2, 'ทับทิม': 3, 'เพชร': 4 };
+            let colorIndex = knownLevels[response.level] !== undefined ? knownLevels[response.level] : 0;
             lvlBadge.style.background = levelColors[colorIndex];
 
+            // แสดงการ์ดของรางวัล (หน้าหลัก)
             const rewardsContainer = document.getElementById('rewards-container');
             if (rewardsContainer) {
                 rewardsContainer.innerHTML = '';
@@ -630,37 +620,50 @@
                         rewardsContainer.insertAdjacentHTML('beforeend', card);
                     });
                 } else {
-                    rewardsContainer.innerHTML = '<div class="col-span-2 text-center text-sm text-gray-500 py-8 bg-white rounded-2xl border border-gray-100">ไม่มีของรางวัลในขณะนี้</div>';
+                    rewardsContainer.innerHTML = '<div class="col-span-2 text-center text-sm text-gray-500 py-8 bg-white rounded-2xl border border-gray-100">ไม่มีของรางวัลที่ท่านสามารถแลกได้ในขณะนี้</div>';
                 }
             }
 
-            myAvailableRewards = [];
-            myUsedRewards = [];
-            myExpiredRewards = [];
-            
-            if (response.myRewards && response.myRewards.length > 0) {
-                myAvailableRewards = response.myRewards.filter(r => r.status === '0');
-                myUsedRewards = response.myRewards.filter(r => r.status === '1');
-                myExpiredRewards = response.myRewards.filter(r => r.status === '2');
-
-                myAvailableRewards.sort((a, b) => {
-                    if (a.rawExpireDate === b.rawExpireDate) return b.points - a.points;
-                    return a.rawExpireDate - b.rawExpireDate;
-                });
-                myUsedRewards.sort((a, b) => b.points - a.points);
-                myExpiredRewards.sort((a, b) => b.points - a.points);
-            }
-
-            renderMyRewards(); 
-
+            // ทันทีที่โหลดข้อมูลพื้นฐานเสร็จ ให้ปิดหน้าล็อกอินแล้วโชว์หน้าแรกทันที
             if (!isSilent) {
                 setTimeout(() => {
                     document.getElementById('login-section').classList.add('hidden');
                     document.getElementById('bottom-nav').classList.remove('hidden');
                     switchTab('home');
                     switchMyRewardTab('available'); 
-                }, 400); 
+                }, 150); 
             }
+
+            // แอบไปดึงข้อมูล "รางวัลของฉัน" (ประวัติคูปอง) ทำงานเบื้องหลัง ไม่ต้องรอ
+            fetchMyRewardsAsync(response.customerId);
+        }
+
+        // ฟังก์ชันโหลดข้อมูล "รางวัลของฉัน" เบื้องหลัง
+        function fetchMyRewardsAsync(customerId) {
+            callGasApi('getMyRewards', { customerId: customerId })
+                .then(res => {
+                    myAvailableRewards = [];
+                    myUsedRewards = [];
+                    myExpiredRewards = [];
+                    
+                    if (res.success && res.myRewards && res.myRewards.length > 0) {
+                        myAvailableRewards = res.myRewards.filter(r => r.status === '0');
+                        myUsedRewards = res.myRewards.filter(r => r.status === '1');
+                        myExpiredRewards = res.myRewards.filter(r => r.status === '2');
+
+                        myAvailableRewards.sort((a, b) => {
+                            if (a.rawExpireDate === b.rawExpireDate) return b.points - a.points;
+                            return a.rawExpireDate - b.rawExpireDate;
+                        });
+                        myUsedRewards.sort((a, b) => b.points - a.points);
+                        myExpiredRewards.sort((a, b) => b.points - a.points);
+                    }
+                    renderMyRewards(); // พอโหลดเสร็จก็เอาไปแปะลงหน้าจอรอไว้
+                })
+                .catch(err => {
+                    console.error("Failed to fetch my rewards", err);
+                    document.getElementById('my-rewards-available-container').innerHTML = '<div class="text-center text-sm text-red-500 py-8">โหลดข้อมูลคูปองล้มเหลว กรุณารีเฟรช</div>';
+                });
         }
 
         function renderMyRewards() {
