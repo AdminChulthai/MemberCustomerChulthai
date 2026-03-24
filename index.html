@@ -30,7 +30,10 @@
         }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .progress-smooth { transition: width 50ms linear; }
+        /* ทำให้ Progress Bar เคลื่อนไหวลื่นไหลมากขึ้น */
+        .progress-smooth { 
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start pt-8 px-4 pb-24">
@@ -155,7 +158,14 @@
 
     <!-- 2.1 หน้า รางวัลของฉัน (แบบมี Tab ใช้งานได้ / ใช้แล้ว / หมดอายุ) -->
     <div id="rewards-page" class="w-full max-w-md hidden opacity-0 transition-opacity duration-300 flex flex-col h-[calc(100vh-6rem)]">
-        <h2 class="text-2xl font-bold text-gray-800 mb-3 px-2 flex-shrink-0">รางวัลของฉัน</h2>
+        <div class="flex justify-between items-center mb-3 px-2 flex-shrink-0">
+            <h2 class="text-2xl font-bold text-gray-800">รางวัลของฉัน</h2>
+            <button onclick="refreshMyRewards()" class="text-blue-600 hover:bg-blue-100 p-2 rounded-full transition-colors flex items-center justify-center bg-blue-50 shadow-sm" title="รีเฟรชข้อมูล">
+                <svg id="refresh-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
         
         <!-- แถบเมนูสถานะ (ด้านบน) -->
         <div class="flex bg-gray-200/60 p-1 rounded-xl mb-4 mx-2 flex-shrink-0">
@@ -454,7 +464,6 @@
             document.getElementById('btnText').innerText = 'เข้าสู่ระบบ';
             document.getElementById('progress-container').classList.add('hidden');
             const progBar = document.getElementById('progress-bar');
-            progBar.style.transitionDuration = '0ms'; 
             progBar.style.width = '0%';
             document.getElementById('progress-text').innerText = '0%';
         }
@@ -492,20 +501,22 @@
                 const progLabel = document.getElementById('progress-label');
                 
                 progLabel.innerText = 'กำลังตรวจสอบสิทธิ์...';
-                progBar.style.transitionDuration = '100ms'; 
                 
                 let currentProgress = 0;
-                
                 if (loginProgressInterval) clearInterval(loginProgressInterval);
+                
+                // คำนวณความเนียนของหลอดโหลด
                 loginProgressInterval = setInterval(() => {
                     if (currentProgress < 90) {
-                        currentProgress += 1;
+                        currentProgress += (Math.random() * 2 + 0.5); // เพิ่มแบบสุ่มทีละนิด
+                        if(currentProgress > 90) currentProgress = 90;
                         progBar.style.width = currentProgress + '%';
-                        progText.innerText = currentProgress + '%';
+                        progText.innerText = Math.floor(currentProgress) + '%';
                         
-                        if(currentProgress === 40) progLabel.innerText = 'กำลังดาวน์โหลดข้อมูลทั้งหมด...';
+                        if(currentProgress > 40 && currentProgress < 80) progLabel.innerText = 'กำลังดาวน์โหลดข้อมูลทั้งหมด...';
+                        if(currentProgress >= 80) progLabel.innerText = 'เกือบเสร็จแล้ว...';
                     }
-                }, 15);
+                }, 80);
 
             } else {
                 phone = savedPhone; password = savedPassword;
@@ -541,7 +552,6 @@
                 
                 if (response.success) {
                     progLabel.innerText = 'เสร็จสมบูรณ์!';
-                    progBar.style.transitionDuration = '100ms'; 
                     progBar.style.width = '100%'; 
                     progText.innerText = '100%';
                 } else {
@@ -643,7 +653,7 @@
                     document.getElementById('bottom-nav').classList.remove('hidden');
                     switchTab('home');
                     switchMyRewardTab('available'); 
-                }, 300); // หน่วงเวลาเล็กน้อยเพื่อให้กราฟิกหลอดโหลดวิ่งเต็ม 100% แบบสวยงาม
+                }, 400); // หน่วงเวลาเพื่อให้โหลดเสร็จสวยงาม
             }
         }
 
@@ -848,6 +858,7 @@
 
         function closeConfirmModal() { document.getElementById('confirm-modal').classList.add('hidden'); }
 
+        // ปรับปรุงกระบวนการแลกรางวัล (Real-time Optimistic Update)
         function processRedeem() {
             if (selectedRewardIndex === null || !currentUser) return;
             
@@ -871,11 +882,34 @@
                 closeConfirmModal();
                 
                 if (response.success) {
+                    // อัปเดตคะแนนทันทีบนหน้าจอ
                     currentUser.points = response.remainingPoints;
                     document.getElementById('disp-points').innerText = Number(currentUser.points).toLocaleString();
-                    showMsg('แลกสำเร็จ!', `คุณได้รับรหัสคูปอง: ${response.couponCode}\n\nกรุณาแคปหน้าจอคูปองนี้ไว้เป็นหลักฐาน`);
+                    
+                    // --- เพิ่มข้อมูลรางวัลใหม่แบบ Real-time เข้าไปในหน้า "ใช้งานได้" ทันที ---
+                    const newRewardItem = {
+                        couponCode: response.couponCode,
+                        name: reward.name,
+                        points: reward.points,
+                        image: reward.image,
+                        expireDate: 'รอระบบยืนยัน...', // จะอัปเดตเป็นวันหมดอายุจริงเมื่อซิงค์ข้อมูลรอบถัดไป
+                        rawExpireDate: new Date().getTime() + (365*24*60*60*1000), // ดันให้อยู่บนสุด
+                        redeemDate: response.redeemDateStr || new Date().toLocaleDateString('th-TH'),
+                        usedDate: '-',
+                        status: '0' 
+                    };
+                    
+                    // แทรกเข้าที่ตำแหน่งแรกของ List
+                    myAvailableRewards.unshift(newRewardItem);
+                    // สั่ง Render หน้าต่างรางวัลของฉันใหม่ทันที
+                    renderMyRewards();
+                    // ----------------------------------------------------------------------
+                    
+                    showMsg('แลกสำเร็จ!', `คุณได้รับรหัสคูปอง: ${response.couponCode}\n\nคูปองของคุณสามารถตรวจสอบได้ในเมนู "รางวัลของฉัน"`);
                     closeRewardDetail();
-                    processLogin(true); // รีโหลดข้อมูลแบบเงียบ
+                    
+                    // โหลดข้อมูลแบบเงียบเบื้องหลัง เพื่อซิงค์กับระบบอีกครั้ง
+                    processLogin(true); 
                 } else {
                     showMsg('ไม่สามารถแลกได้', response.message);
                 }
@@ -994,6 +1028,46 @@
                 closeConfirmPwd();
                 showMsg('เกิดข้อผิดพลาด', error.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
             });
+        }
+
+        // ฟังก์ชันสำหรับรีเฟรชข้อมูล "รางวัลของฉัน" โดยเฉพาะ
+        function refreshMyRewards() {
+            if (!currentUser) return;
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('animate-spin'); // ให้ไอคอนหมุนระหว่างรอ
+            
+            callGasApi('getMyRewards', { customerId: currentUser.customerId })
+                .then(response => {
+                    icon.classList.remove('animate-spin');
+                    if (response.success) {
+                        // ล้างข้อมูลเดิมและเรียงข้อมูลใหม่
+                        myAvailableRewards = [];
+                        myUsedRewards = [];
+                        myExpiredRewards = [];
+                        
+                        if (response.myRewards && response.myRewards.length > 0) {
+                            myAvailableRewards = response.myRewards.filter(r => r.status === '0');
+                            myUsedRewards = response.myRewards.filter(r => r.status === '1');
+                            myExpiredRewards = response.myRewards.filter(r => r.status === '2');
+
+                            myAvailableRewards.sort((a, b) => {
+                                if (a.rawExpireDate === b.rawExpireDate) return b.points - a.points;
+                                return a.rawExpireDate - b.rawExpireDate;
+                            });
+                            myUsedRewards.sort((a, b) => b.points - a.points);
+                            myExpiredRewards.sort((a, b) => b.points - a.points);
+                        }
+                        
+                        // สร้างรายการคูปองใหม่บนหน้าจอ
+                        renderMyRewards();
+                    } else {
+                        showMsg('รีเฟรชไม่สำเร็จ', response.message || 'ไม่สามารถดึงข้อมูลใหม่ได้');
+                    }
+                })
+                .catch(error => {
+                    icon.classList.remove('animate-spin');
+                    showMsg('เกิดข้อผิดพลาด', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อรีเฟรชได้');
+                });
         }
 
         // ดึงข้อมูลเวอร์ชันเมื่อโหลดหน้าเว็บเสร็จ
