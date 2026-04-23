@@ -106,13 +106,14 @@
                 <button type="button" onclick="showMsg('ลืมรหัสผ่าน', 'ติดต่อแอดมินผ่าน LINE')" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">ลืมรหัสผ่าน?</button>
             </div>
 
+            <!-- เปลี่ยนหลอดโหลดเป็นสีแดง -->
             <div id="progress-container" class="hidden w-full mt-2">
-                <div class="flex justify-between text-xs font-semibold text-blue-800 mb-1">
+                <div class="flex justify-between text-xs font-semibold text-red-600 mb-1">
                     <span id="progress-label">สถานะข้อมูล...</span>
                     <span id="progress-text">0%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-smooth" style="width: 0%"></div>
+                    <div id="progress-bar" class="bg-red-600 h-2.5 rounded-full progress-smooth" style="width: 0%"></div>
                 </div>
             </div>
 
@@ -407,7 +408,7 @@
                 <h3 class="font-bold text-lg text-gray-800">ตัวอย่างป้ายสินค้า</h3>
                 <button onclick="closeTagHelpModal()" class="text-gray-500 hover:text-gray-900 bg-gray-200 rounded-full p-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
-            <div class="p-4 bg-gray-200 flex justify-center"><img src="https://drive.google.com/thumbnail?id=1r6jMpXbz42Hks4Ii-uzoVsx6NwMM3KaX&sz=w800" alt="ตัวอย่างป้าย" class="w-full max-h-[60vh] object-contain rounded-lg shadow-sm"></div>
+            <div class="p-4 bg-gray-200 flex justify-center"><img src="https://drive.google.com/thumbnail?id=1mqBzzmA7Ov-OFfvk2lwaFtSzWmKtqc61&sz=w800" alt="ตัวอย่างป้าย" class="w-full max-h-[60vh] object-contain rounded-lg shadow-sm"></div>
             <div class="p-4 text-center"><button onclick="closeTagHelpModal()" class="w-full bg-blue-800 text-white font-bold py-3 rounded-xl text-lg">เข้าใจแล้ว</button></div>
         </div>
     </div>
@@ -741,12 +742,16 @@
                             imageHtml = `<img src="${emp.image}" class="w-20 h-20 rounded-full mx-auto object-cover mb-3 border-2 border-gray-100 bg-gray-100 shadow-sm" onerror="this.onerror=null; this.outerHTML='${safeFallbackHtml}'">`;
                         }
 
+                        // --- แทนที่ช่องว่าง (Space) ด้วย <br> เพื่อให้ตัดบรรทัด ---
+                        let formattedName = emp.name.trim().replace(" ", "<br>");
+
                         const html = `
                         <label class="cursor-pointer w-full">
                             <input type="radio" name="fb-employee" value="${emp.id}" class="peer sr-only">
                             <div class="rounded-xl border-2 border-gray-300 p-4 text-center transition-all bg-white shadow-sm peer-checked:border-blue-800 peer-checked:bg-blue-50 h-full flex flex-col items-center justify-start">
                                 ${imageHtml}
-                                <p class="text-[16px] font-bold text-gray-800 line-clamp-2 leading-tight w-full">${emp.name}</p>
+                                <!-- ปรับ leading-tight เพื่อให้ระยะห่างบรรทัดสวยงามเมื่อตัดคำ -->
+                                <p class="text-[16px] font-bold text-gray-800 leading-tight w-full">${formattedName}</p>
                             </div>
                         </label>
                         `;
@@ -1442,14 +1447,12 @@
             setTimeout(() => { modal.classList.remove('translate-x-full'); }, 10);
         }
 
-        // --- เพิ่มฟังก์ชันใหม่ จัดการเมื่อมีการพิมพ์ตัวเลขเอง ---
         function updateQuantityFromInput() {
             let val = parseInt(document.getElementById('detail-quantity').value);
             if (isNaN(val) || val < 1) val = 1;
             validateAndSetQuantity(val);
         }
 
-        // --- ปรับปรุงฟังก์ชันเดิม ให้นำค่ามาตรวจสอบ ---
         function changeQuantity(delta) {
             let newQ = currentRedeemQuantity + delta;
             validateAndSetQuantity(newQ);
@@ -1459,17 +1462,15 @@
             if (selectedRewardIndex === null) return;
             const reward = availableRewardsList[selectedRewardIndex];
             
-            // ตรวจสอบกับจำนวนคงเหลือ
             if (newQ > currentRedeemMax) { 
                 showMsg('เกินจำนวนคงเหลือ', 'ของรางวัลชิ้นนี้มีจำนวนจำกัดเหลือเพียง ' + currentRedeemMax + ' ชิ้น'); 
                 newQ = currentRedeemMax;
             }
             
-            // ตรวจสอบแต้มว่าพอหรือไม่
             if ((newQ * Number(reward.points)) > Number(currentUser.points)) { 
                 showMsg('แต้มไม่พอ', 'แต้มสะสมของคุณไม่เพียงพอสำหรับการเพิ่มจำนวนสิทธิ์นี้'); 
                 let maxByPts = Math.floor(Number(currentUser.points) / Number(reward.points));
-                newQ = maxByPts < 1 ? 1 : maxByPts; // ป้องกันเป็น 0 ให้กลับเป็น 1 เพื่อแสดงผล แต่จะกดยืนยันแลกไม่ได้
+                newQ = maxByPts < 1 ? 1 : maxByPts; 
             }
             
             if (newQ < 1) newQ = 1;
@@ -1482,7 +1483,6 @@
             document.getElementById('detail-quantity').value = currentRedeemQuantity;
             document.getElementById('detail-total-points').innerText = (currentRedeemQuantity * Number(availableRewardsList[selectedRewardIndex].points)).toLocaleString() + " แต้ม";
         }
-        // --------------------------------------------------
 
         function closeRewardDetail() {
             const modal = document.getElementById('reward-detail-modal');
